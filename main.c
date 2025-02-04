@@ -263,7 +263,12 @@ int main() {
                 writeCSV(filename, accounts[accountCount]);
                 accountCount++;
             case 2:
-                escape = true;
+            char name[MAX_CHAR];
+            printf("Please enter your name: ");
+            fgets(name, MAX_CHAR, stdin);
+            name[strcspn(name, "\n")] = '\0'; // Remove newline character
+            searchAccount(accounts, accountCount, name);
+            break;
             default:
                 printf("Invalid option. Please try again.\n");
         }
