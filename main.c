@@ -12,7 +12,7 @@ typedef struct
     int accNum;
     float balance;
     int PhoneNo;
-}account;
+} account;
 
 
 void mergeint(int arr[], int left, int mid, int right) {
