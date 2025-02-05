@@ -131,39 +131,46 @@ void addBankaccount(account *newaccount) {
 
 
 void writeCSV(const char *filename, account acc) {
-    FILE *file = fopen(filename, "a");  // Open file in write mode
+    FILE *file = fopen(filename, "a");
     if (file == NULL) {
         perror("Error opening file");
         return;
     }
-
-    // Directly store data in CSV format
-    fprintf(file, "%s,%llu,%.2f,%d\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
-
+    fprintf(file, "%s,%llu,%.2f,%lld\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
     fclose(file);
     printf("Data written to %s successfully!\n", filename);
 }
 
 void readCSV(const char *filename) {
-    FILE *file = fopen(filename, "r");  // Open file in read mode
+    FILE *file = fopen(filename, "r");
     if (file == NULL) {
         perror("Error opening file");
         return;
     }
-
     char line[256];
     account acc;
-
     while (fgets(line, sizeof(line), file)) {
-        if (sscanf(line, "%127[^,],%llu,%f,%d", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
-            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %d\n\n",
+        if (sscanf(line, "%127[^,],%llu,%f,%lld", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
+            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %lld\n\n", 
                    acc.name, acc.accNum, acc.balance, acc.PhoneNo);
         } else {
             printf("Error reading line: %s\n", line);
         }
     }
+    fclose(file);
+}
 
-    fclose(file);  // Close the file
+void addBankAccount(account *newAccount) {
+    printf("Enter name: ");
+    fgets(newAccount->name, MAX_CHAR, stdin);
+    newAccount->name[strcspn(newAccount->name, "\n")] = '\0';
+    newAccount->accNum = 1000000000000000ULL + (rand() % 9000000000000000ULL);
+    printf("Your account number is: %llu\n", newAccount->accNum);
+    printf("Enter balance: ");
+    scanf("%f", &newAccount->balance);
+    printf("Enter phone number: ");
+    scanf("%lld", &newAccount->PhoneNo);
+    getchar(); // Consume leftover newline
 }
 
 // Function to input account details
@@ -259,9 +266,9 @@ int main() {
 
         switch (option) {
             case 1:
-                addBankaccount(accounts);
-                writeCSV(filename, accounts[accountCount]);
-                accountCount++;
+                addBankaccount(&acc);
+                writeCSV(filename, acc);
+                break;
             case 2:
             char name[MAX_CHAR];
             printf("Please enter your name: ");
