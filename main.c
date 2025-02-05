@@ -126,7 +126,8 @@ void addBankaccount(account *newaccount) {
     scanf("%f", &newaccount->balance);
 
     printf("\n************************************\nPhone Number:\n");
-    scanf("%d", &newaccount->PhoneNo);
+    scanf("%lld", &newaccount->PhoneNo);
+    getchar();
 }
 
 
@@ -138,7 +139,7 @@ void writeCSV(const char *filename, account acc) {
     }
 
     // Directly store data in CSV format
-    fprintf(file, "%s,%llu,%.2f,%d\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
+    fprintf(file, "%s,%llu,%.2f,%lld\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
 
     fclose(file);
     printf("Data written to %s successfully!\n", filename);
@@ -155,8 +156,8 @@ void readCSV(const char *filename) {
     account acc;
 
     while (fgets(line, sizeof(line), file)) {
-        if (sscanf(line, "%127[^,],%llu,%f,%d", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
-            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %d\n\n",
+        if (sscanf(line, "%127[^,],%llu,%f,%lld", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
+            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %lld\n\n",
                    acc.name, acc.accNum, acc.balance, acc.PhoneNo);
         } else {
             printf("Error reading line: %s\n", line);
@@ -252,7 +253,7 @@ int main() {
     char filename[] = "accounts.csv";
 
     do {
-        printf("\n1. Add Account\n2. Write to CSV\n3. Read from CSV\n4. Search Account\n5. Exit\n");
+        printf("\n1. Add Account\n2. Create account\n3. Search Account\n4. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &option);
         getchar(); // Consume newline character left by scanf
@@ -262,6 +263,7 @@ int main() {
                 addBankaccount(accounts);
                 writeCSV(filename, accounts[accountCount]);
                 accountCount++;
+                break;
             case 2:
             char name[MAX_CHAR];
             printf("Please enter your name: ");
@@ -272,6 +274,6 @@ int main() {
             default:
                 printf("Invalid option. Please try again.\n");
         }
-    } while (!escape);
+    } while (option != 4);
     return 0;
 }
