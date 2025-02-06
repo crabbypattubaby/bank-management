@@ -11,7 +11,7 @@ typedef struct {
     char name[MAX_CHAR];
     unsigned long long accNum;
     float balance;
-    long long int PhoneNo;
+    unsigned long long PhoneNo; // Changed to unsigned long long
 } account;
 
 // Function to merge two subarrays of arr[]
@@ -53,12 +53,12 @@ void mergeint(int arr[], int left, int mid, int right) {
 }
 
 // Function to sort an array using merge sort algorithm
-void mergeSortInt(int arr[], int left, int right) {
+void mergeSortint(int arr[], int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
 
-        mergeSortInt(arr, left, mid);
-        mergeSortInt(arr, mid + 1, right);
+        mergeSortint(arr, left, mid);
+        mergeSortint(arr, mid + 1, right);
 
         mergeint(arr, left, mid, right);
     }
@@ -102,7 +102,7 @@ void mergeString(char arr[][20], int left, int mid, int right) {
     }
 }
 
-// Function to perform merge sort on an array of strings
+// Function to sort a string array using merge sort algorithm
 void mergeSortString(char arr[][20], int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -115,62 +115,58 @@ void mergeSortString(char arr[][20], int left, int right) {
 }
 
 // Function to add a bank account
-void addBankaccount(account *newaccount) {
-    printf("\n************************************\nName:\n");
-    fgets(newaccount->name, MAX_CHAR, stdin);
-    newaccount->name[strcspn(newaccount->name, "\n")] = '\0'; // Remove newline character
-    newaccount->accNum = 1000000000000000ULL + (rand() % 9000000000000000ULL);
-    printf("Your account number is: %llu\n", newaccount->accNum);
+void addBankaccount(account accounts[], int *accountCount) {
+    printf("Enter name: ");
+    fgets(accounts[*accountCount].name, MAX_CHAR, stdin);
+    accounts[*accountCount].name[strcspn(accounts[*accountCount].name, "\n")] = '\0'; // Remove newline character
 
-    printf("\n************************************\nBalance:\n");
-    scanf("%f", &newaccount->balance);
+    printf("Enter account number: ");
+    scanf("%llu", &accounts[*accountCount].accNum);
 
-    printf("\n************************************\nPhone Number:\n");
-    scanf("%d", &newaccount->PhoneNo);
+    printf("Enter balance: ");
+    scanf("%f", &accounts[*accountCount].balance);
+
+    printf("Enter phone number: ");
+    scanf("%llu", &accounts[*accountCount].PhoneNo);
+
+    (*accountCount)++;
 }
 
-
+// Function to write account to CSV file
 void writeCSV(const char *filename, account acc) {
-    FILE *file = fopen(filename, "a");
+    FILE *file = fopen(filename, "a");  // Open file in write mode
     if (file == NULL) {
-        perror("Error opening file");
+        perror("Failed to open file");
         return;
     }
-    fprintf(file, "%s,%llu,%.2f,%lld\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
+
+    // Directly store data in CSV format
+    fprintf(file, "%s,%llu,%.2f,%d\n", acc.name, acc.accNum, acc.balance, acc.PhoneNo);
+
     fclose(file);
     printf("Data written to %s successfully!\n", filename);
 }
 
 void readCSV(const char *filename) {
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "r");  // Open file in read mode
     if (file == NULL) {
         perror("Error opening file");
         return;
     }
+
     char line[256];
     account acc;
+
     while (fgets(line, sizeof(line), file)) {
-        if (sscanf(line, "%127[^,],%llu,%f,%lld", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
-            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %lld\n\n", 
+        if (sscanf(line, "%127[^,],%llu,%f,%d", acc.name, &acc.accNum, &acc.balance, &acc.PhoneNo) == 4) {
+            printf("Name: %s\nAccount Number: %llu\nBalance: %.2f\nPhone Number: %d\n\n",
                    acc.name, acc.accNum, acc.balance, acc.PhoneNo);
         } else {
             printf("Error reading line: %s\n", line);
         }
     }
-    fclose(file);
-}
 
-void addBankAccount(account *newAccount) {
-    printf("Enter name: ");
-    fgets(newAccount->name, MAX_CHAR, stdin);
-    newAccount->name[strcspn(newAccount->name, "\n")] = '\0';
-    newAccount->accNum = 1000000000000000ULL + (rand() % 9000000000000000ULL);
-    printf("Your account number is: %llu\n", newAccount->accNum);
-    printf("Enter balance: ");
-    scanf("%f", &newAccount->balance);
-    printf("Enter phone number: ");
-    scanf("%lld", &newAccount->PhoneNo);
-    getchar(); // Consume leftover newline
+    fclose(file);  // Close the file
 }
 
 // Function to input account details
@@ -238,17 +234,15 @@ int lengthCSV(const char *filename){
     }
 
     int count = 0;
-    char line[1024];  // Buffer to read lines
-
-    while (fgets(line, sizeof(line), file)) {
-        count++;  // Count each line
+    while (count < maxAccounts && fgets(line, sizeof(line), file)) {
+        if (sscanf(line, "%127[^,],%llu,%f,%llu", accounts[count].name, &accounts[count].accNum, &accounts[count].balance, &accounts[count].PhoneNo) == 4) {
+            count++;
+        }
     }
 
     fclose(file);
     return count;
 }
-
-
 
 int main() {
     int option;
@@ -259,26 +253,34 @@ int main() {
     char filename[] = "accounts.csv";
 
     do {
-        printf("\n1. Add Account\n2. Write to CSV\n3. Read from CSV\n4. Search Account\n5. Exit\n");
+        printf("\n1. Add Account\n2. Search Account\n3. Leave program\n4. Search Account\n5. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &option);
         getchar(); // Consume newline character left by scanf
 
         switch (option) {
             case 1:
-                addBankaccount(&acc);
-                writeCSV(filename, acc);
+                addBankaccount(&accounts);
+                writeCSV(filename, accounts);
                 break;
             case 2:
-            char name[MAX_CHAR];
-            printf("Please enter your name: ");
-            fgets(name, MAX_CHAR, stdin);
-            name[strcspn(name, "\n")] = '\0'; // Remove newline character
-            searchAccount(accounts, accountCount, name);
-            break;
+                {
+                    char name[MAX_CHAR];
+                    printf("Please enter your name: ");
+                    fgets(name, MAX_CHAR, stdin);
+                    name[strcspn(name, "\n")] = '\0'; // Remove newline character
+                    searchAccount(accounts, accountCount, name);
+                }
+                break;
+            case 3:
+                printf("Thank you for using the program :).\n");
+                escape = true;
+                break;
             default:
                 printf("Invalid option. Please try again.\n");
+                break;
         }
     } while (!escape);
+
     return 0;
 }
